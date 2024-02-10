@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aldrich&family=Silkscreen&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Onion Site Search</title>
+    <style>
+        body {
+            font-family: Silkscreen;
+            background-color: rgb(12,12,12);
+            /* background-image: url('../../img_tuse.jpg'); */
+            margin: 0;
+            padding: 0;
+            color: white;
+            background-image: linear-gradient(rgba(0,0,0,0.7),rgba(0, 0, 0, 0.4)),url('../../img_tuse.jpg');
+            background-size: 30%;
+            background-repeat: no-repeat;
+            background-color: black;
+            background-position: center;
+            
+        }
+
+
+
+        h1 {
+            text-align: center;
+            font-size: 3em;
+        }
+
+        h3 {
+            text-align: center;
+            font-size: 2em;
+        }
+
+        form {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        input[type="text"] {
+            padding: 5px;
+            margin-right: 10px;
+            outline: none;
+            background-color: rgb(255,250,250);
+        }
+
+        input[type="button"] {
+            padding: 5px 10px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-family: Silkscreen;
+        }
+
+        #Trend {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: rgba(0,0,0,0);
+            box-shadow: 0 0 10px rgb(171, 171, 179);
+            max-width: 900px;
+            color: white;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .final{
+            margin-top: 2vw;;
+            width: 61.5vw;
+            height: 50vh;
+            margin-left: 19.3vw;
+            position: relative;
+            font-family: Aldrich;
+            font-size: 1.8em;
+        }
+
+        .left{
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            text-align: center;
+            box-shadow: 0 0 10px rgb(171, 171, 179);
+        }
+
+        .right{
+            text-align: center;
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            margin-left: 50%;
+            box-shadow: 0 0 10px rgb(171, 171, 179);
+        }
+
+        .cont{
+            margin-left: 25vw;
+        }
+
+        .mail{
+            margin-left: 5vw;
+        }
+    </style>
+</head>
+<body>
+    <h1>Onion Crawler</h1>
+    <h3>Single Onion Site Crawler</h3>
+    <form id="searchForm">
+        <label for="query">Crawling URL :</label>
+        <input type="text" id="query" name="query">
+        <label for="keywordQuery">Search Keyword :</label>
+        <input type="text" id="keywordQuery" name="keywordQuery">
+        <input type="button" value="Search" onclick="submitForm()">
+    </form>
+
+    <h3>List Onion Site Crawler</h3>
+
+    <form id="keywordForm">
+        <label for="keywordQuery">Search Keyword :</label>
+        <input type="text" id="keywordQuery2" name="keywordQuery">
+        <input type="button" value="Search" onclick="submitKeywordForm()">
+    </form>
+
+    <div id="Trend">Suggestions
+        <input type="button" value="Contact" class="sugg cont" onclick="enumCont()">
+        <input type="button" value="Mail" class="sugg mail" onclick="enumMail()">
+    </div>
+
+    <div class="final">
+        
+    </div>
+    
+    <div id="resultContainer"></div>
+    
+    <script>
+function submitForm() {
+    var query = document.getElementById('query').value;
+    var keywordQuery = document.getElementById('keywordQuery').value;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://127.0.0.1:5001/search', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                displayResult(response.result, keywordQuery);
+            } else {
+                console.error("Error in request:", xhr.status, xhr.statusText);
+            }
+        }
+    };
+    xhr.send('query=' + query + '&keywordQuery=' + keywordQuery);
+}
+
+function submitKeywordForm() {
+    var keywordQuery = document.getElementById('keywordQuery2').value;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://127.0.0.1:5001/keyword', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                displayResult(response.result, keywordQuery);
+            } else {
+                console.error("Error in request:", xhr.status, xhr.statusText);
+            }
+        }
+    };
+    xhr.send('keyword=' + keywordQuery);
+}
+
+function displayResult(result, keyword) {
+    var resultContainer = document.getElementById('resultContainer');
+    resultContainer.innerHTML = "";
+
+    var div = document.createElement('div');
+    div.style.textAlign = 'center';
+    div.style.marginTop = '20px';
+
+    if (result.length === 0) {
+        div.innerHTML = "<p>No Onion Sites found.</p>";
+    } else {
+        div.innerHTML = `<p>Keyword '${keyword}' found on:</p><ul>`;
+        result.forEach(function (site) {
+            div.innerHTML += `<li>${site}</li>`;
+        });
+        div.innerHTML += `</ul>`;
+    }
+
+    resultContainer.appendChild(div);
+}
+</script>
+</body>
+</html>
+
+

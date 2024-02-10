@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Onion Site Search</title>
+    <style>
+        body {
+            font-family: Silkscreen;
+            /* background-color: #f0f0f0; */
+            background-color: rgb(12,12,12);
+            margin: 0;
+            padding: 0;
+            color: white;
+        }
+
+
+
+        h1 {
+            text-align: center;
+            font-size: 3em;
+        }
+
+        form {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        input[type="text"] {
+            padding: 5px;
+            margin-right: 10px;
+            outline: none;
+            background-color: rgb(255,250,250);
+        }
+
+        input[type="button"] {
+            padding: 5px 10px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-family: Silkscreen;
+        }
+
+        #resultContainer {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: rgba(0,0,0,0);
+            box-shadow: 0 0 20px rgb(171, 171, 179);
+            max-width: 900px;
+            color: white;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Onion Keyword Scrapper</h1>
+    <form id="searchForm">
+        <label for="query">Enter your Keyword:</label>
+        <input type="text" id="query" name="query">
+        <input type="button" value="Search" onclick="submitForm()">
+    </form>
+
+    <div id="resultContainer"></div>
+
+    <script>
+        function submitForm() {
+            var query = document.getElementById('query').value;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://127.0.0.1:5000/search', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    displayResult(response.result);
+                } else if (xhr.readyState === 4 && xhr.status !== 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    displayResult(response.error);
+                }
+            };
+            xhr.send('query=' + query);
+        }
+
+        function displayResult(result) {
+            var resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = "";
+
+            if (result.length === 0) {
+                resultContainer.innerHTML = "<p>No Onion Sites found.</p>";
+            } else {
+                var ul = document.createElement('ul');
+                result.forEach(function (site) {
+                    var li = document.createElement('li');
+                    li.appendChild(document.createTextNode(site));
+                    ul.appendChild(li);
+                });
+                resultContainer.appendChild(ul);
+            }
+        }
+    </script>
+</body>
+</html>
